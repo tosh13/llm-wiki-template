@@ -1,0 +1,31 @@
+{
+  "vaults": ["llm-wiki"],
+  "general_settings": {
+    "showMoreActionsButton": false,
+    "betaFeatures": false,
+    "legacyMode": false,
+    "silentOpen": true,
+    "openBehavior": "nothing",
+    "saveBehavior": "addToObsidian"
+  },
+  "template_list": ["llmwiki001"],
+  "template_llmwiki001": {
+    "id": "llmwiki001",
+    "name": "llm-wiki source",
+    "behavior": "create",
+    "vault": "llm-wiki",
+    "path": "sources/clippings",
+    "noteNameFormat": "{{date|date:'YYYYMMDD'}}-{{title|safe_name}}",
+    "noteContentFormat": "## {{title}}\n\n{{content}}\n\n## 参照元\n- {{url}}\n- clipped: {{date|date:'YYYY-MM-DD'}}",
+    "properties": [
+      { "name": "type",        "value": "source-summary",              "type": "text" },
+      { "name": "sensitivity", "value": "public",                      "type": "text" },
+      { "name": "tags",        "value": "clipping",                    "type": "multitext" },
+      { "name": "source",      "value": "{{url}}",                     "type": "text" },
+      { "name": "author",      "value": "{{author}}",                  "type": "text" },
+      { "name": "created",     "value": "{{date|date:'YYYY-MM-DD'}}", "type": "date" }
+    ],
+    "triggers": [],
+    "context": "{{fullHtml}}"
+  }
+}
