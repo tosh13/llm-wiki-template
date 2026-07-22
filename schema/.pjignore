@@ -1,0 +1,4 @@
+# このディレクトリの CLAUDE.md は vault へ symlink するための wiki 運用規約であり、
+# 実運用プロジェクト（Claude Code で作業する場所）ではない。
+# pj ツール（~/Projects/ai-environment/dotfiles/.zshrc.claude）はこのマーカーを見て
+# 同ディレクトリの CLAUDE.md をプロジェクト一覧から除外する。
