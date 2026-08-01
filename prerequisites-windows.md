@@ -40,6 +40,7 @@ Node.js が無ければ先に https://nodejs.org からインストールする�
   - [ ] Obsidian の Settings → Sync から有効化し、リモート vault を作成
 - **Syncthing** — 無料・クラウド不経由の P2P。自分の端末間のみで同期。常時起動する端末が要る
 - **OneDrive / Dropbox は非推奨** — 既定で E2E でなく事業者が鍵を持つ。さらに「Files On-Demand（オンデマンド）」のプレースホルダで Claude/Obsidian がファイルを掴めない事故が起きやすい。使う場合は該当フォルダを「常にこのデバイスに保持」に設定し、`sensitivity: confidential` のページは置かない運用に限定する
+- **iCloud Drive を使う場合（例：家族共有の Apple ID があり Mac 側と同期基盤を揃えたいケース）は要注意。** Windows 版 iCloud の「iCloud Drive」機能が同期するのは `iCloudDrive` 直下だけで、Mac 側で `setup.sh` が作る vault は Obsidian のアプリ専用コンテナ（`~/Library/Mobile Documents/iCloud~md~obsidian/`）にあり、これは別の同期ドメインである。両者を取り違えると、Windows 側に `iCloudDrive\llm-wiki` という空の別 vault が新規にできてしまい、Mac 側の本物の vault とは同期しないまま並行して育つ（実例：2026-08-01、詳細は wiki の `macos-icloud-app-container-vs-drive-root` 参照）。**iCloud Drive を選ぶ場合は、Windows 側で先に `iCloudDrive\iCloud~md~obsidian\` 配下に既存 vault が無いかを確認してから vault の置き場所を決める。**
 
 ## 4. ディスク暗号化
 
