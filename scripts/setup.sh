@@ -14,11 +14,13 @@ TEMPLATE_ROOT="$(template_root "${BASH_SOURCE[0]}")"
 # Parse flags
 DRY_RUN=0
 MIGRATE_EXISTING=0
+WIRE_ONLY=0
 WIKI_NAME="llm-wiki"
 for arg in "$@"; do
     case "$arg" in
         --dry-run) DRY_RUN=1 ;;
         --migrate-existing) MIGRATE_EXISTING=1 ;;
+        --wire-only) WIRE_ONLY=1 ;;
         --wiki-name=*) WIKI_NAME="${arg#--wiki-name=}" ;;
         --help|-h)
             cat <<EOF
@@ -27,6 +29,9 @@ Usage: $0 [options]
 Options:
   --dry-run             変更を加えず、何が起こるかを表示
   --migrate-existing    既存の ~/llm-wiki/ を template 管理に切り替える
+  --wire-only           vault の中身に触らず、この端末の配線だけを行う
+                        （2台目以降。vault は iCloud で共有される実体なので、
+                          中身を書き換えると他の端末へ波及する）
   --wiki-name=NAME      vault 名を指定（既定: llm-wiki）
   --help, -h            このヘルプを表示
 EOF
@@ -44,6 +49,7 @@ info "テンプレート: $TEMPLATE_ROOT"
 info "Vault名: $WIKI_NAME"
 [ "$DRY_RUN" = "1" ] && warn "DRY RUN モード: 変更は加えません"
 [ "$MIGRATE_EXISTING" = "1" ] && warn "MIGRATE モード: 既存ファイルを上書きします（確認あり）"
+[ "$WIRE_ONLY" = "1" ] && warn "WIRE-ONLY モード: vault の中身には触れず、この端末の配線だけを行います"
 
 # ===== Step 1: 前提チェック =====
 info ""
@@ -69,10 +75,21 @@ info "Step 2/12: vault パス"
 info "  実体:    $VAULT_PATH"
 info "  symlink: $SYMLINK_PATH"
 
+# vault は iCloud で全端末が共有する1つの実体。2台目以降で中身を書き換えると
+# 他の端末へ波及する（Step 6 の CLAUDE.md 置換、Step 12 の receipt がこれに当たる）。
+# 既に構築済みの vault を見つけたら、配線だけに絞るよう促す。
+if [ "$WIRE_ONLY" = "0" ] && [ -f "$VAULT_PATH/index.md" ]; then
+    warn "この vault は既に構築済みです（別の端末が作ったものが iCloud で降りている）"
+    warn "vault は全端末で共有される1つの実体なので、中身を書き換えると他の端末へ波及します"
+    warn "2台目以降は --wire-only を付けてください（配線だけを行い、vault には触れません）"
+fi
+
 # ===== Step 3: ディレクトリツリー作成 =====
 info ""
 info "Step 3/12: ディレクトリツリー作成"
-if [ "$DRY_RUN" = "0" ]; then
+if [ "$WIRE_ONLY" = "1" ]; then
+    ok "skip（--wire-only）"
+elif [ "$DRY_RUN" = "0" ]; then
     mkdir -p "$VAULT_PATH"/sources/handoffs \
              "$VAULT_PATH"/sources/papers \
              "$VAULT_PATH"/sources/references \
@@ -97,7 +114,9 @@ fi
 # ===== Step 5: seed/ をコピー（既存はskip） =====
 info ""
 info "Step 5/12: seed/ をコピー（既存ファイルはskip）"
-if [ "$DRY_RUN" = "0" ]; then
+if [ "$WIRE_ONLY" = "1" ]; then
+    ok "skip（--wire-only）"
+elif [ "$DRY_RUN" = "0" ]; then
     # トップレベルの index.md, log.md
     for name in index.md log.md; do
         src="$TEMPLATE_ROOT/seed/$name"
@@ -132,7 +151,11 @@ fi
 # ===== Step 6: schema/CLAUDE.md を vault に symlink =====
 info ""
 info "Step 6/12: schema/CLAUDE.md を vault に symlink"
-if [ "$DRY_RUN" = "0" ]; then
+if [ "$WIRE_ONLY" = "1" ]; then
+    # vault の CLAUDE.md を symlink に置き換えると、リンク先はこの端末にしか
+    # 存在しないパスなので、他の端末には壊れたリンクか通常ファイルとして降りる。
+    ok "skip（--wire-only。vault の CLAUDE.md は共有実体なので触らない）"
+elif [ "$DRY_RUN" = "0" ]; then
     if [ "$MIGRATE_EXISTING" = "1" ]; then
         safe_symlink "$TEMPLATE_ROOT/schema/CLAUDE.md" "$VAULT_PATH/CLAUDE.md" --force
     else
@@ -185,7 +208,9 @@ EOF
 
 # ===== Step 11: local-notes.md =====
 info "Step 11/12: local-notes.md（個人メモ用、CLAUDE.md から @include）"
-if [ "$DRY_RUN" = "0" ]; then
+if [ "$WIRE_ONLY" = "1" ]; then
+    ok "skip（--wire-only）"
+elif [ "$DRY_RUN" = "0" ]; then
     if [ ! -f "$VAULT_PATH/local-notes.md" ]; then
         cat > "$VAULT_PATH/local-notes.md" <<'EOF'
 # ローカルメモ
@@ -206,7 +231,11 @@ fi
 # ===== Step 12: setup-receipt =====
 info ""
 info "Step 12/12: setup-receipt.json（update.sh が version 比較に使用）"
-if [ "$DRY_RUN" = "0" ]; then
+if [ "$WIRE_ONLY" = "1" ]; then
+    # receipt は template_root に端末ごとのパスを持つ。vault は共有実体なので、
+    # 2台目以降が書くと1台目の値を潰し、端末間で上書きし合う。
+    ok "skip（--wire-only。既存の値を残す）"
+elif [ "$DRY_RUN" = "0" ]; then
     cat > "$VAULT_PATH/.setup-receipt.json" <<EOF
 {
   "version": "$VERSION",

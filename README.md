@@ -42,6 +42,18 @@ bash ~/Projects/llm-wiki-template/scripts/setup.sh
 - `~/.claude/CLAUDE.md` に `@LLM-WIKI.md` 行を追記
 - Web Clipper の設定インポート手順を表示
 
+### 2台目以降は `--wire-only`
+
+```bash
+bash ~/Projects/llm-wiki-template/scripts/setup.sh --wire-only
+```
+
+**vault は iCloud 上の1つの実体を全端末で共有する。** 2台目以降で vault の中身を書き換えると、その変更は他の端末へ波及する。とくに `schema/CLAUDE.md` の symlink はリンク先がその端末にしか無いパスなので、他の端末には壊れたリンクか通常ファイルとして降りる。`.setup-receipt.json` も `template_root` に端末ごとのパスを持つため、端末間で上書きし合う。
+
+`--wire-only` はこの端末に必要な配線だけを行う——`~/llm-wiki` の symlink、`~/.claude/LLM-WIKI.md` の symlink、`~/.claude/CLAUDE.md` への `@LLM-WIKI.md` 追記の3つ。vault のディレクトリ・seed・`CLAUDE.md`・`local-notes.md`・receipt には触れない。
+
+付け忘れても、既に構築済みの vault を見つけた時点で警告が出る。
+
 ### 3. Obsidian で開く
 
 Mac の Obsidian で `~/llm-wiki` を vault として開く。
