@@ -8,14 +8,14 @@ Karpathyパターンに基づく3層構造。Claude CodeがWikiを維持管理�
 
 ## 3層構造のルール
 
-### Layer 1: sources/（Raw Sources）
+### Layer 1: sources/ — Raw Sources
 - LLMはread-onlyで扱う。絶対に編集しない
 - `clippings/`: Obsidian Web Clipperでクリップしたウェブページ
 - `handoffs/`: 他AIサービス（ChatGPT, Gemini等）からのハンドオフmdファイル
 - `papers/`: 論文・文献の要約・PDF
 - `references/`: ~/Projects/ 内の参照ファイルのシンボリック的な記録、GDriveドキュメントへのポインタ
 
-### Layer 2: wiki/（LLM-maintained）
+### Layer 2: wiki/ — LLM-maintained
 - Claude Codeが執筆・更新する
 - ユーザーはread-onlyとして扱う（訂正は指示ベース）
 - ファイル命名: ケバブケース（例: fhir-r4.md, project-strategy.md）
@@ -23,7 +23,7 @@ Karpathyパターンに基づく3層構造。Claude CodeがWikiを維持管理�
 - 各ページの末尾に「## 参照元」セクションを設け、出典パスを記録
 - ページ間参照は `[[ページ名]]` 形式（Obsidianグラフビュー対応）
 
-### Layer 3: CLAUDE.md（Schema）
+### Layer 3: CLAUDE.md — Schema
 - このファイル。Wiki全体の構造規約とワークフローを定義
 - **vault の中には置かない。** かつて vault へ symlink していたが、リンク先が端末ごとに違うのに vault は iCloud 上の1実体を全端末で共有するため壊れた（2026-08-17 に廃止）
 
@@ -103,7 +103,7 @@ Wikiページを新規作成・削除するたびに index.md を更新するこ
 - 移動: [[ページ名]] — 旧パス → 新パス
 ```
 
-## Ingestフロー（新しいsourcesファイルを取り込む際）
+## Ingestフロー
 
 1. sources/ の新ファイルを読む
 2. 既存のwiki/ページと照合（更新が必要なページを特定）
@@ -124,7 +124,7 @@ Wikiページを新規作成・削除するたびに index.md を更新するこ
 - 単純な手順実行の報告 → 保存しない
 - 意思決定とその理由 → wiki/synthesis/ に保存
 
-## エンティティページテンプレート（人物）
+## 人物エンティティページのテンプレート
 
 ```markdown
 ---
@@ -162,4 +162,6 @@ GDrive上の生きたドキュメントは sources/references/ にポインタ�
 - 内容: GDrive file ID、ingest日時、ドキュメントの概要
 - 定期的に再ingestして鮮度を保つ
 
-@local-notes.md
+## 個人ごとの追加指示
+
+vault 直下に `local-notes.md` があれば読む（Ingest 優先度・環境固有の指示）。本ファイルは vault の外（llm-wiki-template）にあるため、`@local-notes.md` のような相対 import では解決されない。

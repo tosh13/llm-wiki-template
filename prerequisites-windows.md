@@ -89,14 +89,11 @@ Get-ChildItem "$Template\seed\wiki\concepts\*.md" | ForEach-Object {
   if (-not (Test-Path $dst)) { Copy-Item $_.FullName $dst }
 }
 
-# 3. 運用規約 schema/CLAUDE.md を vault に配置（copy 運用）
-Copy-Item "$Template\schema\CLAUDE.md" (Join-Path $Vault "CLAUDE.md") -Force
-
-# 4. 自動Ingest指示 schema/LLM-WIKI.md を ~/.claude に配置
+# 3. 自動Ingest指示 schema/LLM-WIKI.md を ~/.claude に配置
 New-Item -ItemType Directory -Force -Path $ClaudeD | Out-Null
 Copy-Item "$Template\schema\LLM-WIKI.md" (Join-Path $ClaudeD "LLM-WIKI.md") -Force
 
-# 5. グローバル CLAUDE.md に @LLM-WIKI.md 行を確保
+# 4. グローバル CLAUDE.md に @LLM-WIKI.md 行を確保
 $g = Join-Path $ClaudeD "CLAUDE.md"
 if (-not (Test-Path $g)) { "@LLM-WIKI.md" | Set-Content $g -Encoding utf8 }
 elseif (-not (Select-String -Path $g -Pattern '^@LLM-WIKI\.md\s*$' -Quiet)) {
@@ -104,7 +101,7 @@ elseif (-not (Select-String -Path $g -Pattern '^@LLM-WIKI\.md\s*$' -Quiet)) {
 }
 ```
 
-`schema/CLAUDE.md` 末尾の `@local-notes.md` を使う場合は、vault 直下に `local-notes.md` を作る（無くても動作する）。
+運用規約（`$Template\schema\CLAUDE.md`）は vault に置かない。clone したこのファイルが唯一の正本で、`schema\LLM-WIKI.md` がその場所を Claude へ伝える。個人ごとの追加指示を使う場合は、vault 直下に `local-notes.md` を作る（無くても動作する）。
 
 ## Web Clipper 設定インポート
 
@@ -115,12 +112,11 @@ elseif (-not (Select-String -Path $g -Pattern '^@LLM-WIKI\.md\s*$' -Quiet)) {
 
 ## copy 運用の継続同期
 
-macOS 版は symlink で自動反映するが、Windows は copy 運用にした。テンプレートを更新したら手動セットアップ手順の 3〜4（`schema/CLAUDE.md`・`LLM-WIKI.md` のコピー）を再実行して反映する。
+macOS 版は symlink で自動反映するが、Windows は copy 運用にした。コピーが要るのは `LLM-WIKI.md` の1本だけで、運用規約 `schema\CLAUDE.md` は clone したものを直接読むため `git pull` で最新になる。
 
 ```powershell
 cd $env:USERPROFILE\Projects\llm-wiki-template
 git pull
-Copy-Item "schema\CLAUDE.md" "$env:USERPROFILE\Documents\llm-wiki\CLAUDE.md" -Force
 Copy-Item "schema\LLM-WIKI.md" "$env:USERPROFILE\.claude\LLM-WIKI.md" -Force
 ```
 
@@ -129,7 +125,7 @@ Copy-Item "schema\LLM-WIKI.md" "$env:USERPROFILE\.claude\LLM-WIKI.md" -Force
 ```powershell
 claude --version
 git --version
-Test-Path "$env:USERPROFILE\Documents\llm-wiki\CLAUDE.md"
+Test-Path "$env:USERPROFILE\Projects\llm-wiki-template\schema\CLAUDE.md"
 Test-Path "$env:USERPROFILE\.claude\LLM-WIKI.md"
 ```
 

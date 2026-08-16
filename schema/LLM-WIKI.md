@@ -1,6 +1,6 @@
 # LLM Wiki 連携
 
-個人用知識ベース `~/llm-wiki/` を Karpathy パターンで維持管理する。スキーマの正本は llm-wiki-template の `schema/CLAUDE.md`（既定の clone 先なら `~/Projects/llm-wiki-template/schema/CLAUDE.md`）。vault 側にも同名の写しが symlink で置かれるが、リンク先は端末ごとに違うため正本にしない。
+個人用知識ベース `~/llm-wiki/` を Karpathy パターンで維持管理する。スキーマの正本は llm-wiki-template の `schema/CLAUDE.md`（既定の clone 先なら `~/Projects/llm-wiki-template/schema/CLAUDE.md`）。vault 側には置かない（かつて symlink していたが、リンク先が端末ごとに違うため 2026-08-17 に廃止）。古い端末の vault に写しが残っていても、正本は上記を読む。
 **Claude Code は全プロジェクトの作業中、以下を自律的に行う。ユーザーへの確認は不要。**
 
 ## 人物情報の取り扱い

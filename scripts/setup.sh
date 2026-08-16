@@ -76,7 +76,8 @@ info "  実体:    $VAULT_PATH"
 info "  symlink: $SYMLINK_PATH"
 
 # vault は iCloud で全端末が共有する1つの実体。2台目以降で中身を書き換えると
-# 他の端末へ波及する（Step 6 の CLAUDE.md 置換、Step 12 の receipt がこれに当たる）。
+# 他の端末へ波及する（Step 5 の seed コピー、Step 10 の local-notes、Step 11 の
+# receipt がこれに当たる）。
 # 既に構築済みの vault を見つけたら、配線だけに絞るよう促す。
 if [ "$WIRE_ONLY" = "0" ] && [ -f "$VAULT_PATH/index.md" ]; then
     warn "この vault は既に構築済みです（別の端末が作ったものが iCloud で降りている）"
@@ -192,7 +193,7 @@ cat <<EOF
 EOF
 
 # ===== Step 10: local-notes.md =====
-info "Step 10/11: local-notes.md（個人メモ用、CLAUDE.md から @include）"
+info "Step 10/11: local-notes.md（個人メモ用。運用規約が vault 直下を読む）"
 if [ "$WIRE_ONLY" = "1" ]; then
     ok "skip（--wire-only）"
 elif [ "$DRY_RUN" = "0" ]; then
@@ -200,7 +201,7 @@ elif [ "$DRY_RUN" = "0" ]; then
         cat > "$VAULT_PATH/local-notes.md" <<'EOF'
 # ローカルメモ
 
-このファイルはCLAUDE.md から `@local-notes.md` でincludeされる個人メモ用ファイル。
+運用規約（llm-wiki-template の `schema/CLAUDE.md`）が vault 直下のこのファイルを読む。
 gitに含まれないので、自分の環境固有の追加指示や将来Ingest候補の優先度を書ける。
 
 ## 例: 将来のIngest候補
