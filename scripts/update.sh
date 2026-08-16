@@ -77,5 +77,5 @@ info "  必要に応じて Chrome拡張のSettings → Import all settings か�
 
 echo
 ok "===== アップデート完了 ====="
-info "schema/CLAUDE.md と schema/LLM-WIKI.md は symlink 経由で自動更新済み"
+info "schema/LLM-WIKI.md は symlink 経由で自動更新済み（schema/CLAUDE.md はこのリポジトリが正本なので配置は不要）"
 info "次回 claude 起動時から新しい運用規約が反映されます"

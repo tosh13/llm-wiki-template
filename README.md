@@ -37,7 +37,6 @@ bash ~/Projects/llm-wiki-template/scripts/setup.sh
 - iCloud Drive 内に vault ディレクトリを作成
 - `~/llm-wiki` を vault への symlink として作成
 - 初期 seed ファイル（概念ページ3件）をコピー
-- `schema/CLAUDE.md` を vault に symlink（運用規約）
 - `schema/LLM-WIKI.md` を `~/.claude/` に symlink（自動Ingest指示）
 - `~/.claude/CLAUDE.md` に `@LLM-WIKI.md` 行を追記
 - Web Clipper の設定インポート手順を表示
@@ -48,9 +47,11 @@ bash ~/Projects/llm-wiki-template/scripts/setup.sh
 bash ~/Projects/llm-wiki-template/scripts/setup.sh --wire-only
 ```
 
-**vault は iCloud 上の1つの実体を全端末で共有する。** 2台目以降で vault の中身を書き換えると、その変更は他の端末へ波及する。とくに `schema/CLAUDE.md` の symlink はリンク先がその端末にしか無いパスなので、他の端末には壊れたリンクか通常ファイルとして降りる。`.setup-receipt.json` も `template_root` に端末ごとのパスを持つため、端末間で上書きし合う。
+**vault は iCloud 上の1つの実体を全端末で共有する。** 2台目以降で vault の中身を書き換えると、その変更は他の端末へ波及する。`.setup-receipt.json` は `template_root` に端末ごとのパスを持つため、端末間で上書きし合う。
 
-`--wire-only` はこの端末に必要な配線だけを行う——`~/llm-wiki` の symlink、`~/.claude/LLM-WIKI.md` の symlink、`~/.claude/CLAUDE.md` への `@LLM-WIKI.md` 追記の3つ。vault のディレクトリ・seed・`CLAUDE.md`・`local-notes.md`・receipt には触れない。
+かつては `schema/CLAUDE.md` を vault へ symlink していたが、リンク先がその端末にしか無いパスなので他の端末には壊れたリンクとして降りるか消えた。2026-08-17 に廃止し、運用規約はこのリポジトリの `schema/CLAUDE.md` を唯一の正本とした（既に vault へ置かれている端末は、その `CLAUDE.md` を手で削除してよい）。
+
+`--wire-only` はこの端末に必要な配線だけを行う——`~/llm-wiki` の symlink、`~/.claude/LLM-WIKI.md` の symlink、`~/.claude/CLAUDE.md` への `@LLM-WIKI.md` 追記の3つ。vault のディレクトリ・seed・`local-notes.md`・receipt には触れない。
 
 付け忘れても、既に構築済みの vault を見つけた時点で警告が出る。
 
@@ -74,7 +75,7 @@ llm-wikiについて教えて
 1. `prerequisites.md` — 必要なアカウントとツール
 2. `story/design-rationale.md` — なぜこの設計になったかの経緯と設計判断の理由
 3. `seed/wiki/concepts/llm-wiki-how-to-use.md` — 日常利用ガイド（Web Clipper・Ingestタイミング・FAQ）
-4. `schema/CLAUDE.md` — wiki 運用の規約（参考）
+4. `schema/CLAUDE.md` — wiki 運用の規約。Claude がスキーマの正本として読む
 
 ## 継続同期
 
@@ -86,7 +87,7 @@ git pull
 bash scripts/update.sh
 ```
 
-`schema/CLAUDE.md` と `schema/LLM-WIKI.md` は symlink 経由で自動反映される。
+`schema/LLM-WIKI.md` は symlink 経由で自動反映される。`schema/CLAUDE.md` はこのリポジトリが正本なので `git pull` だけで最新になる。
 `seed/` の概念ページは新規追加分のみコピー、手動編集済みのものは保護される。
 
 ## ディレクトリ構成
@@ -100,7 +101,7 @@ llm-wiki-template/
 ├── story/
 │   └── design-rationale.md            # 経緯と設計判断の理由
 ├── schema/
-│   ├── CLAUDE.md                      # wiki 運用規約（vault に symlink される）
+│   ├── CLAUDE.md                      # wiki 運用規約（このファイルが正本）
 │   └── LLM-WIKI.md                    # ~/.claude/ に symlink される自動Ingest指示
 ├── seed/                              # 初回コピーのみ（以降は手動編集を尊重）
 │   ├── index.md

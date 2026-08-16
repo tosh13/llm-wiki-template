@@ -53,7 +53,7 @@ info "Vault名: $WIKI_NAME"
 
 # ===== Step 1: 前提チェック =====
 info ""
-info "Step 1/12: 前提チェック"
+info "Step 1/11: 前提チェック"
 check_macos
 check_command claude "https://docs.anthropic.com/claude/docs/claude-code を参照" || exit 1
 if [ ! -d "/Applications/Obsidian.app" ] && [ ! -d "$HOME/Applications/Obsidian.app" ]; then
@@ -71,7 +71,7 @@ VAULT_PATH="$(icloud_vault_path "$WIKI_NAME")"
 SYMLINK_PATH="$HOME/$WIKI_NAME"
 
 info ""
-info "Step 2/12: vault パス"
+info "Step 2/11: vault パス"
 info "  実体:    $VAULT_PATH"
 info "  symlink: $SYMLINK_PATH"
 
@@ -86,7 +86,7 @@ fi
 
 # ===== Step 3: ディレクトリツリー作成 =====
 info ""
-info "Step 3/12: ディレクトリツリー作成"
+info "Step 3/11: ディレクトリツリー作成"
 if [ "$WIRE_ONLY" = "1" ]; then
     ok "skip（--wire-only）"
 elif [ "$DRY_RUN" = "0" ]; then
@@ -102,7 +102,7 @@ ok "ディレクトリ作成"
 
 # ===== Step 4: ~/llm-wiki symlink =====
 info ""
-info "Step 4/12: ~/$WIKI_NAME symlink"
+info "Step 4/11: ~/$WIKI_NAME symlink"
 if [ "$DRY_RUN" = "0" ]; then
     if [ "$MIGRATE_EXISTING" = "1" ]; then
         safe_symlink "$VAULT_PATH" "$SYMLINK_PATH" --force
@@ -113,7 +113,7 @@ fi
 
 # ===== Step 5: seed/ をコピー（既存はskip） =====
 info ""
-info "Step 5/12: seed/ をコピー（既存ファイルはskip）"
+info "Step 5/11: seed/ をコピー（既存ファイルはskip）"
 if [ "$WIRE_ONLY" = "1" ]; then
     ok "skip（--wire-only）"
 elif [ "$DRY_RUN" = "0" ]; then
@@ -148,32 +148,17 @@ elif [ "$DRY_RUN" = "0" ]; then
     done
 fi
 
-# ===== Step 6: schema/CLAUDE.md を vault に symlink =====
+# ===== Step 6: schema/LLM-WIKI.md を ~/.claude/ に symlink =====
 info ""
-info "Step 6/12: schema/CLAUDE.md を vault に symlink"
-if [ "$WIRE_ONLY" = "1" ]; then
-    # vault の CLAUDE.md を symlink に置き換えると、リンク先はこの端末にしか
-    # 存在しないパスなので、他の端末には壊れたリンクか通常ファイルとして降りる。
-    ok "skip（--wire-only。vault の CLAUDE.md は共有実体なので触らない）"
-elif [ "$DRY_RUN" = "0" ]; then
-    if [ "$MIGRATE_EXISTING" = "1" ]; then
-        safe_symlink "$TEMPLATE_ROOT/schema/CLAUDE.md" "$VAULT_PATH/CLAUDE.md" --force
-    else
-        safe_symlink "$TEMPLATE_ROOT/schema/CLAUDE.md" "$VAULT_PATH/CLAUDE.md"
-    fi
-fi
-
-# ===== Step 7: schema/LLM-WIKI.md を ~/.claude/ に symlink =====
-info ""
-info "Step 7/12: schema/LLM-WIKI.md を ~/.claude/ に symlink"
+info "Step 6/11: schema/LLM-WIKI.md を ~/.claude/ に symlink"
 if [ "$DRY_RUN" = "0" ]; then
     mkdir -p "$HOME/.claude"
     safe_symlink "$TEMPLATE_ROOT/schema/LLM-WIKI.md" "$HOME/.claude/LLM-WIKI.md" --force
 fi
 
-# ===== Step 8: ~/.claude/CLAUDE.md に @LLM-WIKI.md 行を確保 =====
+# ===== Step 7: ~/.claude/CLAUDE.md に @LLM-WIKI.md 行を確保 =====
 info ""
-info "Step 8/12: ~/.claude/CLAUDE.md に @LLM-WIKI.md 行があるか確認"
+info "Step 7/11: ~/.claude/CLAUDE.md に @LLM-WIKI.md 行があるか確認"
 GLOBAL_CLAUDE="$HOME/.claude/CLAUDE.md"
 if [ "$DRY_RUN" = "0" ]; then
     if [ ! -f "$GLOBAL_CLAUDE" ]; then
@@ -187,14 +172,14 @@ if [ "$DRY_RUN" = "0" ]; then
     fi
 fi
 
-# ===== Step 9: handoff prompt info =====
+# ===== Step 8: handoff prompt info =====
 info ""
-info "Step 9/12: handoff prompt"
+info "Step 8/11: handoff prompt"
 ok "ChatGPT/Geminiでの利用時は次のファイルを参照: $TEMPLATE_ROOT/prompts/handoff-prompt.md"
 
-# ===== Step 10: Web Clipper 設定インポート手順 =====
+# ===== Step 9: Web Clipper 設定インポート手順 =====
 info ""
-info "Step 10/12: Web Clipper 設定インポート手順（手動）"
+info "Step 9/11: Web Clipper 設定インポート手順（手動）"
 cat <<EOF
 
   1. Chrome に Obsidian Web Clipper 拡張をインストール:
@@ -206,8 +191,8 @@ cat <<EOF
 
 EOF
 
-# ===== Step 11: local-notes.md =====
-info "Step 11/12: local-notes.md（個人メモ用、CLAUDE.md から @include）"
+# ===== Step 10: local-notes.md =====
+info "Step 10/11: local-notes.md（個人メモ用、CLAUDE.md から @include）"
 if [ "$WIRE_ONLY" = "1" ]; then
     ok "skip（--wire-only）"
 elif [ "$DRY_RUN" = "0" ]; then
@@ -228,9 +213,9 @@ EOF
     fi
 fi
 
-# ===== Step 12: setup-receipt =====
+# ===== Step 11: setup-receipt =====
 info ""
-info "Step 12/12: setup-receipt.json（update.sh が version 比較に使用）"
+info "Step 11/11: setup-receipt.json（update.sh が version 比較に使用）"
 if [ "$WIRE_ONLY" = "1" ]; then
     # receipt は template_root に端末ごとのパスを持つ。vault は共有実体なので、
     # 2台目以降が書くと1台目の値を潰し、端末間で上書きし合う。

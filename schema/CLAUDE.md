@@ -2,7 +2,7 @@
 
 ## 概要
 
-このディレクトリは個人用知識ベース（LLM Wiki）。
+`~/llm-wiki`（vault）は個人用知識ベース（LLM Wiki）。本ファイルはその運用規約で、実体は llm-wiki-template の `schema/CLAUDE.md` にある。
 Karpathyパターンに基づく3層構造。Claude CodeがWikiを維持管理する。
 将来的には関心事の全てを対象とする個人KBとして育てていく。
 
@@ -25,6 +25,7 @@ Karpathyパターンに基づく3層構造。Claude CodeがWikiを維持管理�
 
 ### Layer 3: CLAUDE.md（Schema）
 - このファイル。Wiki全体の構造規約とワークフローを定義
+- **vault の中には置かない。** かつて vault へ symlink していたが、リンク先が端末ごとに違うのに vault は iCloud 上の1実体を全端末で共有するため壊れた（2026-08-17 に廃止）
 
 ## wiki/ のディレクトリ構成
 
