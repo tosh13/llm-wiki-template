@@ -131,8 +131,10 @@ def check(vault: str) -> tuple[list[str], list[str]]:
     if dead:
         # 多くは「まだ作っていない人物・案件へのリンク」で、誤りではなく作成候補。
         # 誤りとして鳴らし続けると点検全体が読まれなくなるので、そう書く。
-        issues.append(f"未作成ページへのリンク {len(dead)} 件（作成候補。誤記なら直す）: "
-                      + "・".join(dead[:5]) + (" 他" if len(dead) > 5 else ""))
+        uniq = sorted({d.split(" → ")[1] for d in dead})
+        issues.append(f"未作成ページへのリンク {len(uniq)} 件（のべ {len(dead)} 回。"
+                      f"作成候補。プロジェクト名など wiki のページでないものは誤記）: "
+                      + "・".join(uniq[:5]) + (" 他" if len(uniq) > 5 else ""))
     else:
         oks.append("ページ間リンク: 切れなし")
 
