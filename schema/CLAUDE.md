@@ -15,6 +15,8 @@ Karpathyパターンに基づく3層構造。Claude CodeがWikiを維持管理�
 - `papers/`: 論文・文献の要約・PDF
 - `references/`: ~/Projects/ 内の参照ファイルのシンボリック的な記録、GDriveドキュメントへのポインタ
 
+索引（`index.md`・`index/`）は Layer 2 から生成される派生物で、正本ではない。
+
 ### Layer 2: wiki/ — LLM-maintained
 - Claude Codeが執筆・更新する
 - ユーザーはread-onlyとして扱う（訂正は指示ベース）
@@ -27,13 +29,17 @@ Karpathyパターンに基づく3層構造。Claude CodeがWikiを維持管理�
 - このファイル。Wiki全体の構造規約とワークフローを定義
 - **vault の中には置かない。** かつて vault へ symlink していたが、リンク先が端末ごとに違うのに vault は iCloud 上の1実体を全端末で共有するため壊れた（2026-08-17 に廃止）
 
-## wiki/ のディレクトリ構成
+## vault のディレクトリ構成
 
 ```
 wiki/
   concepts/    # 抽象的な知識・方法論・制度の仕組み・技術パターン
   entities/    # 具体的な存在（人物・組織・ツール・法令名）
   synthesis/   # 横断分析・比較・意思決定の記録
+index.md       # 生成物。概念・分析の索引と entity 区分の一覧
+index/         # 生成物。entities-<区分>.md
+log.md         # 直近30日ぶんの作業ログ
+log/           # それ以前を月ごとに退避（YYYY-MM.md）
 ```
 
 **原則**: フォルダは3種のみ。細分類はフロントマターの `type` / `category` / `tags` で行う。
@@ -56,16 +62,34 @@ wiki/
 type: concept | entity | synthesis
 category: person | organization | tool | regulation | method | project | analysis | ...
 sensitivity: public | internal | confidential
-tags: []
+tags: [grp/<区分>, ...]
 aliases: []
 sources: []
 related_entities: []
 related_concepts: []
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
-summary: "1行の要約（index.md・log.mdスキャン用）"
+summary: "1行の要約"
 ---
 ```
+
+必須は `type`・`sensitivity`・`summary`・`updated` の4つ。`category` は entity でのみ必須
+（person / organization / tool / regulation）。`type` の正本はフォルダで、両者が食い違えば
+フォルダを採る。
+
+`summary` は索引の1行になる。索引はこれを詰めて出すので、200字程度までに収める。
+
+entity は `tags` に区分を1つ持つ（`grp/colleague` 等）。この区分が索引のどのファイルに
+載るかを決める。区分の一覧と表示名の正本は vault の `index/groups.json`（無ければ
+`scripts/wikilib.py` の `DEFAULT_GROUPS`）。区分の中身は環境ごとに違うので、
+テンプレート側には持ち込まない。区分が無い entity と、一覧に無い区分は点検が報せる。
+
+```json
+{"groups": [{"slug": "colleague", "label": "人物 — 同僚・仕事関係", "category": "person"}]}
+```
+
+`title:` は置かない。ページの題は本文の H1 が正本で、frontmatter に写すと二重になる。
+別表記は `aliases` に入れる。
 
 ### sensitivityの意味
 
@@ -86,11 +110,22 @@ summary: "1行の要約（index.md・log.mdスキャン用）"
 - Claude Codeコンテキスト露出は許容（ローカルプロジェクトの参照と同等リスク）
 - 将来の部分共有時は `sensitivity: public` のページのみエクスポート対象
 
-## index.md の更新ルール
+## 索引は生成物
 
-Wikiページを新規作成・削除するたびに index.md を更新すること：
-- カテゴリ別にリスト化
-- 各エントリは `- [[ページ名]] — summary フィールドの内容` の形式
+索引を手で書かない。`index.md` と `index/entities-<区分>.md` は各ページの frontmatter
+`summary` から生成する。ページを追加・削除・改題したら次を実行する。
+
+```bash
+python3 ~/Projects/llm-wiki-template/scripts/wiki-index.py
+```
+
+索引の記述を直したいときは、索引ではなくページ側の `summary` を直してから生成し直す。
+索引に直接書くと正本が2本になり、必ず食い違う。実際に2026-09-04 の点検では 354 エントリ中
+303 件がページの summary と食い違い、1エントリが 18,270 文字まで伸びていた。
+
+索引を分割しているのは、1回の Read で全文が返る大きさに収めるため。実測では
+26,676 文字で打ち切られ、打ち切りの告知は出ないまま後半が届かなかった（450行の
+index.md が 80行しか返らなかった）。
 
 ## log.md の更新ルール
 
@@ -103,20 +138,45 @@ Wikiページを新規作成・削除するたびに index.md を更新するこ
 - 移動: [[ページ名]] — 旧パス → 新パス
 ```
 
+事実の本体はページ側に書き、log.md には何をどう変えたかだけを残す。同じ内容を
+ページと log.md の両方に書くと、ページを直したときに log.md が古いまま残る。
+
+log.md は直近30日ぶんだけを持ち、それ以前は月ごとに `log/YYYY-MM.md` へ退避する。
+
+```bash
+python3 ~/Projects/llm-wiki-template/scripts/wiki-log-rotate.py --apply
+```
+
+## ページの大きさ
+
+1ページは 24,000 文字以内に収める。これを超えると1回の Read で全文が返らず、
+後半が黙って届かない。超えたページは主題ごとに分けるか、詳細を `sources/` の
+dossier へ移して本体は要約と参照に留める。
+
+## 点検
+
+```bash
+python3 ~/Projects/llm-wiki-template/scripts/wiki-health.py
+```
+
+索引とページの食い違い、frontmatter の欠落、区分の無い entity、大きすぎるページ、
+切れたリンク、同名ページ、ingest されていない sources、log.md の肥大を見る。
+異常が無ければ何も出さない。
+
 ## Ingestフロー
 
 1. sources/ の新ファイルを読む
 2. 既存のwiki/ページと照合（更新が必要なページを特定）
 3. 該当ページを更新 or 新規ページを作成
 4. 既存ページへの `[[リンク]]` を追加してクロスリファレンスを構築
-5. index.md と log.md を更新
+5. log.md の先頭に追記し、`wiki-index.py` で索引を生成し直す
 
 ## Query-to-Page ルール
 
 ユーザーからの質問・分析依頼に回答した際、その回答がwikiページとして価値がある場合：
 1. 回答内容をwiki/の適切なカテゴリにページとして保存
 2. 既存ページへの[[リンク]]を追加
-3. index.md, log.md を更新
+3. log.md へ追記し、`wiki-index.py` で索引を生成し直す
 4. ユーザーに「wikiを更新しました: [[ページ名]]」と報告
 
 保存の判断基準：
@@ -131,7 +191,7 @@ Wikiページを新規作成・削除するたびに index.md を更新するこ
 type: entity
 category: person
 sensitivity: confidential
-tags: []
+tags: [grp/<区分>]
 aliases: []
 sources: []
 related_entities: []

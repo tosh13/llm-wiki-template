@@ -117,8 +117,31 @@ llm-wiki-template/
 └── scripts/
     ├── setup.sh                       # 初回セットアップ
     ├── update.sh                      # 継続同期
+    ├── wiki-index.py                  # 索引を frontmatter から生成
+    ├── wiki-health.py                 # vault の健全性点検
+    ├── wiki-log-rotate.py             # log.md を月ごとに退避
+    ├── wikilib.py                     # 上3つが使う共通ライブラリ
     └── lib/common.sh
 ```
+
+## 維持のためのスクリプト
+
+vault が育つと、索引・frontmatter・ログが黙って腐る。人が思い出したときだけ点検する
+運用に戻さないための3本（Python 3.9+、依存なし）。
+
+```bash
+python3 scripts/wiki-index.py          # 索引を生成（--check でずれの検出だけ）
+python3 scripts/wiki-health.py         # 点検。異常が無ければ何も出さない
+python3 scripts/wiki-log-rotate.py --apply   # log.md の古い月を log/ へ退避
+```
+
+索引（`index.md`・`index/entities-<区分>.md`）は生成物で、正本は各ページの frontmatter
+`summary`。索引を手で書くと正本が2本になり、実運用では 354 エントリ中 303 件が
+ページ側と食い違った。さらに大きくなった索引は全文を読んでも途中で打ち切られ、
+その告知は出ない（450行のうち80行しか返らなかった）。分割と生成はこの2つへの対処。
+
+点検は SessionStart などで毎回走らせる想定（実測 0.1 秒）。vault が無い端末では黙って
+終わる。
 
 ## MIGRATION
 

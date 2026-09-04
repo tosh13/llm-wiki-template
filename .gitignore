@@ -7,3 +7,7 @@
 # vault 内の個人用ファイル（テンプレートには含めない）
 local-notes.md
 .setup-receipt.json
+
+# Python
+__pycache__/
+*.pyc
