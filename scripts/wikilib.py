@@ -74,7 +74,8 @@ class Page:
 
     @property
     def type(self) -> str:
-        return self.value("type") or FOLDER_TYPE.get(self.folder, "")
+        # 正本はフォルダ（schema）。frontmatter を先に見ると、type の誤記で索引から消える
+        return FOLDER_TYPE.get(self.folder) or self.value("type") or ""
 
     @property
     def chars(self) -> int:
@@ -212,32 +213,6 @@ def load_groups(vault: str | None = None) -> list[tuple[str, str, str]]:
 GROUPS = load_groups()
 GROUP_LABEL = {g: label for g, label, _ in GROUPS}
 GROUP_CATEGORY = {g: cat for g, _, cat in GROUPS}
-
-
-# 旧 index.md の見出し（表記ゆれを含む）から grp スラッグへの対応。移行専用。
-LEGACY_HEADINGS = {
-    "人物 — 本人": "self",
-    "組織": "org",
-    "人物 — 家族": "family",
-    "人物 — かかりつけ医療機関": "healthcare",
-    "人物 — 東大病院 内部・関連": "utokyo-hospital",
-    "人物 — 東大医学部 同窓・人脈（ドクターズネットワーク）": "utokyo-alumni",
-    "人物 — 学生・メンティ": "mentee",
-    "人物 — NHO 関連（齋藤の兼務先・直接の同僚）": "nho",
-    "人物 — CRPC候補・連携対象": "crpc-candidate",
-    "人物 — 海外ARO・CDISCネットワーク": "aro-intl",
-    "人物 — CDISCアカデミアコミュニティ（日本）": "cdisc-academia-jp",
-    "人物 — 千葉大学・アライアンス": "chiba-alliance",
-    "人物 — 大阪大学・関連機関": "osaka",
-    "人物 — 東北大学": "tohoku",
-    "人物 — バイオバンク・ゲノムコホート連携": "biobank",
-    "人物 — CDISC・国際標準化機関": "cdisc-intl",
-    "人物 — CJUG「チームいちがん」（眼科TAUG策定）": "cjug",
-    "人物 — J3C（Japan CDISC Coordinating Committee）メンバー": "j3c",
-    "人物 — 産業・行政・政治": "industry-gov",
-    "法令・規制": "regulation",
-    "ツール・手順": "tool",
-}
 
 
 def value_summary(page: "Page") -> str:
