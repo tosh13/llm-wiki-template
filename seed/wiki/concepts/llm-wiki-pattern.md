@@ -60,6 +60,8 @@ wikiに対して質問する。LLMがindex.mdを読み、関連ページを参�
 **index.md**: コンテンツ目録。カテゴリ別にページをリスト。LLMはクエリ時にまずここを読む。
 **log.md**: 時系列記録。何をいつ行ったかの追記専用ログ。
 
+このテンプレートは log.md を持たない。読み手がいないまま知見の置き場になり、Query から届かなくなったため（schema「変更の記録」）。
+
 ## なぜ機能するか
 
 > "Humans abandon wikis because maintenance burden grows faster than value. LLMs don't get bored, don't forget cross-reference updates, and can touch 15 files in one pass."

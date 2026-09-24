@@ -80,7 +80,7 @@ $dirs = @(
 foreach ($d in $dirs) { New-Item -ItemType Directory -Force -Path (Join-Path $Vault $d) | Out-Null }
 
 # 2. seed の初期ファイルをコピー（既存は上書きしない）
-foreach ($f in @("index.md","log.md")) {
+foreach ($f in @("index.md")) {
   $dst = Join-Path $Vault $f
   if (-not (Test-Path $dst)) { Copy-Item (Join-Path $Template "seed\$f") $dst }
 }

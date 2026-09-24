@@ -10,6 +10,7 @@ Karpathyパターンに基づく3層構造。Claude CodeがWikiを維持管理�
 
 ### Layer 1: sources/ — Raw Sources
 - LLMはread-onlyで扱う。絶対に編集しない
+- 取り込んだら、反映したページの「参照元」からそのファイルを指す。この参照が取り込み済みの印になる。取り込まないと決めたものは消す（見送りの台帳は持たない）
 - `clippings/`: Obsidian Web Clipperでクリップしたウェブページ
 - `handoffs/`: 他AIサービス（ChatGPT, Gemini等）からのハンドオフmdファイル
 - `papers/`: 論文・文献の要約・PDF
@@ -38,8 +39,7 @@ wiki/
   synthesis/   # 横断分析・比較・意思決定の記録
 index.md       # 生成物。概念・分析の索引と entity 区分の一覧
 index/         # 生成物。entities-<区分>.md
-log.md         # 直近30日ぶんの作業ログ
-log/           # それ以前を月ごとに退避（YYYY-MM.md）
+log/           # 廃止した作業ログの保管庫。書き足さない（無い vault もある）
 ```
 
 **原則**: フォルダは3種のみ。細分類はフロントマターの `type` / `category` / `tags` で行う。
@@ -127,25 +127,24 @@ python3 ~/Projects/llm-wiki-template/scripts/wiki-index.py
 26,676 文字で打ち切られ、打ち切りの告知は出ないまま後半が届かなかった（450行の
 index.md が 80行しか返らなかった）。
 
-## log.md の更新ルール
+## 変更の記録
 
-作業のたびに log.md の先頭に追記（新しい順）：
+作業ログ（log.md）は持たない。2026-09-24 に廃止した。
 
-```
-## YYYY-MM-DD
-- 追加: [[ページ名]] — 理由
-- 更新: [[ページ名]] — 変更内容
-- 移動: [[ページ名]] — 旧パス → 新パス
-```
+- 読み手がいなかった。Query は索引からページへ辿り、ログを通らない
+- ページに書いた事実の再掲になり、同じ事実が2箇所に並んだ
+- ページに入らなかった知見がログにだけ溜まり、Query から届かなくなった
+- 全端末の全セッションが同じ1ファイルに書き込むため、iCloud で最も同期が滞るファイルになった
 
-事実の本体はページ側に書き、log.md には何をどう変えたかだけを残す。同じ内容を
-ページと log.md の両方に書くと、ページを直したときに log.md が古いまま残る。
+変更は次のように書く。
 
-log.md は直近30日ぶんだけを持ち、それ以前は月ごとに `log/YYYY-MM.md` へ退避する。
+- 事実・知見・判断は該当ページに書く。置き場所の決まらない知見は concept、判断とその理由は synthesis に書く
+- 訂正の経緯を残すときは、そのページの末尾の経緯節に書く。人物は接触記録に書く
+- 改題したら旧 slug を `aliases` に残す。旧名のリンクと検索が新しいページに届く
 
-```bash
-python3 ~/Projects/llm-wiki-template/scripts/wiki-log-rotate.py --apply
-```
+以前 log.md を持っていた vault では、log.md を `log/` へ移して凍結する。書き足さず、消さない。
+過去の記録は Obsidian の全文検索か `grep -r <語> log/` で探す。vault 直下に log.md が
+再び現れたら、古い指示のまま動いている端末かセッションがあるので、点検が報せる。
 
 ## 未作成ページへのリンクの扱い
 
@@ -177,7 +176,7 @@ python3 ~/Projects/llm-wiki-template/scripts/wiki-health.py
 ```
 
 索引とページの食い違い、frontmatter の欠落、区分の無い entity、大きすぎるページ、
-切れたリンク、同名ページ、ingest されていない sources、log.md の肥大を見る。
+切れたリンク、同名ページ、ingest されていない sources、廃止した log.md の再出現を見る。
 異常が無ければ何も出さない。
 
 ## Ingestフロー
@@ -186,14 +185,14 @@ python3 ~/Projects/llm-wiki-template/scripts/wiki-health.py
 2. 既存のwiki/ページと照合（更新が必要なページを特定）
 3. 該当ページを更新 or 新規ページを作成
 4. 既存ページへの `[[リンク]]` を追加してクロスリファレンスを構築
-5. log.md の先頭に追記し、`wiki-index.py` で索引を生成し直す
+5. `wiki-index.py` で索引を生成し直す
 
 ## Query-to-Page ルール
 
 ユーザーからの質問・分析依頼に回答した際、その回答がwikiページとして価値がある場合：
 1. 回答内容をwiki/の適切なカテゴリにページとして保存
 2. 既存ページへの[[リンク]]を追加
-3. log.md へ追記し、`wiki-index.py` で索引を生成し直す
+3. `wiki-index.py` で索引を生成し直す
 4. ユーザーに「wikiを更新しました: [[ページ名]]」と報告
 
 保存の判断基準：

@@ -105,7 +105,6 @@ llm-wiki-template/
 │   └── LLM-WIKI.md                    # ~/.claude/ に symlink される自動Ingest指示
 ├── seed/                              # 初回コピーのみ（以降は手動編集を尊重）
 │   ├── index.md
-│   ├── log.md
 │   └── wiki/concepts/
 │       ├── llm-wiki-pattern.md
 │       ├── pkb-folder-structure-patterns.md
@@ -119,21 +118,22 @@ llm-wiki-template/
     ├── update.sh                      # 継続同期
     ├── wiki-index.py                  # 索引を frontmatter から生成
     ├── wiki-health.py                 # vault の健全性点検
-    ├── wiki-log-rotate.py             # log.md を月ごとに退避
-    ├── wikilib.py                     # 上3つが使う共通ライブラリ
+    ├── wikilib.py                     # 上2つが使う共通ライブラリ
     └── lib/common.sh
 ```
 
 ## 維持のためのスクリプト
 
-vault が育つと、索引・frontmatter・ログが黙って腐る。人が思い出したときだけ点検する
-運用に戻さないための3本（Python 3.9+、依存なし）。
+vault が育つと、索引・frontmatter が黙って腐る。人が思い出したときだけ点検する
+運用に戻さないための2本（Python 3.9+、依存なし）。
 
 ```bash
 python3 scripts/wiki-index.py          # 索引を生成（--check でずれの検出だけ）
 python3 scripts/wiki-health.py         # 点検。異常が無ければ何も出さない
-python3 scripts/wiki-log-rotate.py --apply   # log.md の古い月を log/ へ退避
 ```
+
+作業ログ（log.md）は 2026-09-24 に廃止した。理由と、既存の log.md の凍結の仕方は
+`schema/CLAUDE.md`「変更の記録」にある。
 
 索引（`index.md`・`index/entities-<区分>.md`）は生成物で、正本は各ページの frontmatter
 `summary`。索引を手で書くと正本が2本になり、実運用では 354 エントリ中 303 件が
@@ -147,6 +147,13 @@ python3 scripts/wiki-log-rotate.py --apply   # log.md の古い月を log/ へ�
 
 破壊的変更（major version bump）が入った場合、`update.sh` がここを参照するよう促す。
 （現在 v0.1.0 — 破壊的変更はまだなし）
+
+2026-09-24 に作業ログ（log.md）を廃止した。以前から使っている vault では、全端末で
+`git pull` を済ませてから、vault 直下の log.md を `log/` へ移して凍結する。
+
+```bash
+cd ~/llm-wiki && mkdir -p log && mv log.md log/log.md
+```
 
 ## ライセンス
 

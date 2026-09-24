@@ -118,8 +118,8 @@ info "Step 5/11: seed/ をコピー（既存ファイルはskip）"
 if [ "$WIRE_ONLY" = "1" ]; then
     ok "skip（--wire-only）"
 elif [ "$DRY_RUN" = "0" ]; then
-    # トップレベルの index.md, log.md
-    for name in index.md log.md; do
+    # トップレベルの index.md（作業ログ log.md は廃止した。schema「変更の記録」）
+    for name in index.md; do
         src="$TEMPLATE_ROOT/seed/$name"
         target="$VAULT_PATH/$name"
         if [ ! -e "$target" ]; then
@@ -129,13 +129,6 @@ elif [ "$DRY_RUN" = "0" ]; then
             ok "既存(skip): $name"
         fi
     done
-    # log.md の YYYY-MM-DD 置換（初回のみ）
-    if [ -f "$VAULT_PATH/log.md" ] && grep -q "YYYY-MM-DD wiki初期化" "$VAULT_PATH/log.md"; then
-        today=$(date +%Y-%m-%d)
-        sed -i.bak "s/YYYY-MM-DD wiki初期化/$today wiki初期化/" "$VAULT_PATH/log.md"
-        rm "$VAULT_PATH/log.md.bak"
-        ok "log.md の日付を $today に置換"
-    fi
     # seed/wiki/concepts/ をコピー
     for src in "$TEMPLATE_ROOT/seed/wiki/concepts"/*.md; do
         name="$(basename "$src")"

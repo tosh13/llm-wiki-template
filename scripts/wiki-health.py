@@ -21,11 +21,6 @@ import importlib.util
 
 import wikilib as W
 
-# log.md をローテーションする閾値。実測（2026-09-04）で 375,939 文字あり、月あたり
-# 10万文字ずつ増えていた。30日で回すと 10万〜17万文字に収まるので、この閾値を
-# 超えるのは「回っていない」ときだけになる。鳴ったのに打つ手が無い状態を作らない。
-LOG_ROTATE_CHARS = 250_000
-
 LINK_RE = re.compile(r"\[\[([^\]|#]+)")
 
 
@@ -194,17 +189,16 @@ def check(vault: str) -> tuple[list[str], list[str]]:
         else:
             oks.append("sources: 全ファイルが wiki から参照されている")
 
-    # --- log.md の大きさ ---
-    log = os.path.join(vault, "log.md")
-    if os.path.exists(log):
-        n = len(open(log, encoding="utf-8").read())
-        if n > LOG_ROTATE_CHARS:
-            here = os.path.dirname(os.path.abspath(__file__))
-            issues.append(f"log.md が {n:,} 文字（閾値 {LOG_ROTATE_CHARS:,}）。"
-                          f"python3 {os.path.join(here, 'wiki-log-rotate.py')} --apply"
-                          f" で古い月を log/ へ退避する")
-        else:
-            oks.append(f"log.md: {n:,} 文字")
+    # --- 廃止した log.md ---
+    # 作業ログは 2026-09-24 に廃止した（schema「変更の記録」）。vault 直下に log.md が
+    # あるのは、移行前の vault か、古い指示のまま書いている端末・セッションがあるとき。
+    # どちらも放置すると書き込みが続き、Query の届かない場所に知見が溜まる。
+    if os.path.exists(os.path.join(vault, "log.md")):
+        issues.append("log.md がある。作業ログは廃止した（schema「変更の記録」）。"
+                      "書き足された内容を該当ページへ移し、log.md は log/ へ移して凍結する。"
+                      "移した後に再び現れたら、古い指示のまま動いている端末かセッションがある")
+    else:
+        oks.append("log.md: 無い（廃止済み）")
 
     return issues, oks
 
