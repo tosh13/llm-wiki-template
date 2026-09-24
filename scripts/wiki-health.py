@@ -36,11 +36,17 @@ def check(vault: str) -> tuple[list[str], list[str]]:
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     stale = []
-    for name, text in mod.build(vault).items():
+    built = mod.build(vault)
+    for name, text in built.items():
         path = os.path.join(vault, name)
         cur = open(path, encoding="utf-8").read() if os.path.exists(path) else ""
         if mod._body(cur) != mod._body(text):
             stale.append(name)
+    # 区分が消えた後に残った索引。生成されるものだけを比べると見逃す
+    idx_dir = os.path.join(vault, "index")
+    if os.path.isdir(idx_dir):
+        stale += [f"index/{f}" for f in sorted(os.listdir(idx_dir))
+                  if f.endswith(".md") and os.path.join("index", f) not in built]
     if stale:
         here = os.path.dirname(os.path.abspath(__file__))
         issues.append(f"索引がページと食い違っている（{'・'.join(stale)}）。"
@@ -67,9 +73,11 @@ def check(vault: str) -> tuple[list[str], list[str]]:
     unknown = sorted({g for p in pages if p.type == "entity" for g in p.groups
                       if g not in known})
     if unknown:
-        issues.append(f"GROUPS に無い区分 {len(unknown)} 件（{'・'.join(unknown)}）。"
+        # 区分の正本は vault の index/groups.json。wikilib.py の既定値は groups.json が
+        # 無いときの代わりで、ここへ足すと公開テンプレートに個人の区分が入る。
+        issues.append(f"区分の一覧に無い区分 {len(unknown)} 件（{'・'.join(unknown)}）。"
                       f"索引に「未分類」の節ができる。既存の区分へ寄せるか、"
-                      f"wikilib.py の GROUPS に足す")
+                      f"vault の index/groups.json に足す")
     unfiled = [p.slug for p in pages if p.type == "entity" and not p.groups]
     if unfiled:
         issues.append(f"区分（tags の grp/…）が無い entity {len(unfiled)} 件: "
@@ -77,6 +85,18 @@ def check(vault: str) -> tuple[list[str], list[str]]:
                       + "。索引の「未分類」に落ちる")
     else:
         oks.append("entity の区分: 全件に grp/… がある")
+    # 区分は category ごとに索引の置き場を決める。人物が grp/tool に入るとツールの索引に
+    # 載り、人物を探しても見つからない（2026-09-25 に9件あった）。
+    gcat = {g: c for g, _, c in W.GROUPS}
+    mism = [f"{p.slug}（{p.value('category')} に grp/{g}）" for p in pages
+            if p.type == "entity" for g in p.groups
+            if g in gcat and gcat[g] and gcat[g] != p.value("category")]
+    if mism:
+        issues.append(f"category と区分が食い違う entity {len(mism)} 件: "
+                      + "・".join(mism[:5]) + (" 他" if len(mism) > 5 else "")
+                      + "。groups.json で category が合う区分に差し替える")
+    else:
+        oks.append("entity の区分: category と一致")
 
     # --- 1回の Read に収まらないページ ---
     big = [(p.chars, p.slug) for p in pages if p.chars > W.READ_CAP_CHARS]
@@ -106,7 +126,7 @@ def check(vault: str) -> tuple[list[str], list[str]]:
     # Obsidian は aliases でも解決するので、別名も到達先として数える。コードブロック・
     # インラインコードの中の [[...]] は書式の例示なので対象外（`[[0-9]]` のような
     # 正規表現や、雛形の `[[ページ名]]` を切れたリンクとして数えない）。
-    targets = slugs | {"index", "open-questions", "log", "local-notes"}
+    targets = slugs | {"index", "local-notes"}
     log_dir = os.path.join(vault, "log")
     if os.path.isdir(log_dir):
         targets |= {os.path.splitext(f)[0] for f in os.listdir(log_dir) if f.endswith(".md")}

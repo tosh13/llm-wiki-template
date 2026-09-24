@@ -57,7 +57,6 @@ def build(vault: str) -> dict[str, str]:
     out.append(f"> 生成 {today}／ページ {len(pages)}件"
                f"（concept {counts.get('concept', 0)}・entity {counts.get('entity', 0)}"
                f"・synthesis {counts.get('synthesis', 0)}）")
-    out.append("> 未確認事項: [[open-questions]]")
     out.append("")
     out.append("## Concepts（抽象的な知識・方法論・制度の仕組み）")
     out.append("")
@@ -134,12 +133,16 @@ def main() -> int:
                 cur = fh.read()
         n = len(text)
         over = "  ← 1回の Read に収まらない" if n > W.READ_CAP_CHARS else ""
+        if _body(cur) == _body(text):
+            continue  # 中身が同じなら書かない。iCloud が全端末へ配り直すのを避ける
         if args.check:
-            if _body(cur) != _body(text):
-                stale.append(name)
+            stale.append(name)
             continue
-        with open(path, "w", encoding="utf-8") as fh:
+        # 一時ファイルに書いてから置き換える。途中で止まっても半端な索引を残さない
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as fh:
             fh.write(text)
+        os.replace(tmp, path)
         print(f"{name}: {n:,} 文字 / {text.count(chr(10)) + 1} 行{over}")
 
     if args.check:
