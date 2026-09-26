@@ -87,7 +87,9 @@ git pull
 bash scripts/update.sh
 ```
 
-`schema/LLM-WIKI.md` は symlink 経由で自動反映される。`schema/CLAUDE.md` はこのリポジトリが正本なので `git pull` だけで最新になる。
+claude-toolkit を入れている端末では、この節の操作は要らない。`install.py` が毎回テンプレートを pull し、`~/.claude/llm-wiki-template`（clone の実体への別名）と `~/.claude/LLM-WIKI.md` を張り直し、`scripts/vault-migrate.py` で vault を現行の schema に合わせる。
+
+`schema/LLM-WIKI.md` は symlink 経由で自動反映される（Windows はコピーなので `install.py` の再実行で反映される）。`schema/CLAUDE.md` はこのリポジトリが正本なので `git pull` だけで最新になる。
 `seed/` の概念ページは新規追加分のみコピー、手動編集済みのものは保護される。
 
 ## ディレクトリ構成
@@ -152,8 +154,10 @@ python3 scripts/wiki-health.py         # 点検。異常が無ければ何も出
 `git pull` を済ませてから、vault 直下の log.md を `log/` へ移して凍結する。
 
 ```bash
-cd ~/llm-wiki && mkdir -p log && mv log.md log/log.md
+python3 ~/.claude/llm-wiki-template/scripts/vault-migrate.py
 ```
+
+claude-toolkit を入れている端末では、`install.py` がこれを毎回呼ぶので手で実行する必要は無い。
 
 ## ライセンス
 

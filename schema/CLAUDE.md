@@ -116,7 +116,7 @@ entity は `tags` に区分を1つ持つ（`grp/colleague` 等）。この区分
 `summary` から生成する。ページを追加・削除・改題したら次を実行する。
 
 ```bash
-python3 ~/Projects/llm-wiki-template/scripts/wiki-index.py
+python3 ~/.claude/llm-wiki-template/scripts/wiki-index.py
 ```
 
 索引の記述を直したいときは、索引ではなくページ側の `summary` を直してから生成し直す。
@@ -159,6 +159,8 @@ index.md が 80行しか返らなかった）。
 - 改題したら旧 slug を `aliases` に残す。旧名のリンクと検索が新しいページに届く
 
 以前 log.md を持っていた vault では、log.md を `log/` へ移して凍結する。書き足さず、消さない。
+凍結は `scripts/vault-migrate.py` が行い、claude-toolkit の `install.py` がテンプレートを pull した直後に毎回呼ぶ。
+手で移す必要は無い。
 過去の記録は Obsidian の全文検索か `grep -r <語> log/` で探す。vault 直下に log.md が
 再び現れたら、古い指示のまま動いている端末かセッションがあるので、点検が報せる。
 
@@ -188,7 +190,7 @@ dossier へ移して本体は要約と参照に留める。
 ## 点検
 
 ```bash
-python3 ~/Projects/llm-wiki-template/scripts/wiki-health.py
+python3 ~/.claude/llm-wiki-template/scripts/wiki-health.py
 ```
 
 索引とページの食い違い（区分が消えた後に残った索引を含む）、frontmatter の欠落、区分の無い entity、

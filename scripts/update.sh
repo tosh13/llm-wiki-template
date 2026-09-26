@@ -75,6 +75,9 @@ WC_SRC="$TEMPLATE_ROOT/dotfiles/obsidian-web-clipper-settings.json"
 ok "テンプレ最新版: $WC_SRC"
 info "  必要に応じて Chrome拡張のSettings → Import all settings から再インポート"
 
+# ===== vault を現行の schema に合わせる（冪等） =====
+python3 "$SCRIPT_DIR/vault-migrate.py" || warn "vault-migrate.py が失敗しました"
+
 echo
 ok "===== アップデート完了 ====="
 info "schema/LLM-WIKI.md は symlink 経由で自動更新済み（schema/CLAUDE.md はこのリポジトリが正本なので配置は不要）"

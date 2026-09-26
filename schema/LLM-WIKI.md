@@ -1,6 +1,6 @@
 # LLM Wiki 連携
 
-個人用知識ベース `~/llm-wiki/` を Karpathy パターンで維持管理する。スキーマの正本は llm-wiki-template の `schema/CLAUDE.md`（既定の clone 先なら `~/Projects/llm-wiki-template/schema/CLAUDE.md`）。vault 側には置かない（かつて symlink していたが、リンク先が端末ごとに違うため 2026-08-17 に廃止）。古い端末の vault に写しが残っていても、正本は上記を読む。
+個人用知識ベース `~/llm-wiki/` を Karpathy パターンで維持管理する。スキーマの正本は llm-wiki-template の `schema/CLAUDE.md`（`~/.claude/llm-wiki-template/schema/CLAUDE.md`）。`~/.claude/llm-wiki-template` は clone の実体（端末により `~/Projects/llm-wiki-template` や `~/Projects/tosh13/llm-wiki-template`）を指す別名で、claude-toolkit の `install.py` が毎回張り直す。vault 側には schema を置かない。写しが残っていても `install.py` が `log/` へ移す。
 **Claude Code は全プロジェクトの作業中、以下を自律的に行う。ユーザーへの確認は不要。**
 
 ## 人物情報の取り扱い
@@ -11,7 +11,7 @@
 
 蓄積すべき知識を見つけたら、`index.md`（概念・分析の索引と entity 区分の一覧）と `index/entities-<区分>.md`（人物・組織・法令・ツール）で既存ページと更新対象を確認して重複を作らず、原資料を `sources/` に格納（外部ファイルは参照ポインタ）、`wiki/` 配下の該当ページを更新する。書き方は schema「ページの更新」（追記を重ねず現況を書き換え、出来事は接触記録へ）と「変更の記録」（作業ログは持たず、知見・判断も該当ページに書く）に従う。完了時に「wikiを更新しました: [[ページ名]]」と一言報告する。
 
-**索引は生成物なので手で書かない。** 直したい記述はページの frontmatter `summary` を直し、`python3 ~/Projects/llm-wiki-template/scripts/wiki-index.py` を実行する。索引に直接書くと正本が2本になる。
+**索引は生成物なので手で書かない。** 直したい記述はページの frontmatter `summary` を直し、`python3 ~/.claude/llm-wiki-template/scripts/wiki-index.py` を実行する。索引に直接書くと正本が2本になる。
 
 対象：プロジェクト横断で有用な概念・知識・事実／意思決定とその理由／人物に関する情報（関係性・接触記録・評価）／法令・規制・基準／比較分析・調査結果。
 
@@ -26,8 +26,8 @@
 そのセッションで得た新事実・接触記録・訂正を関与・言及した各 entity に漏れなく反映する（人物は R3。書き方は schema「ページの更新」）。そのうえで次の2つを実行し、点検が報せた異常のうち直せるものを直してから終える。グローバル設定に終了ルーチン（`~/.claude/SESSION-END.md` 等）があれば、その Step として実行する。
 
 ```bash
-python3 ~/Projects/llm-wiki-template/scripts/wiki-index.py    # 索引を実体に合わせる
-python3 ~/Projects/llm-wiki-template/scripts/wiki-health.py   # 異常が無ければ何も出ない
+python3 ~/.claude/llm-wiki-template/scripts/wiki-index.py    # 索引を実体に合わせる
+python3 ~/.claude/llm-wiki-template/scripts/wiki-health.py   # 異常が無ければ何も出ない
 ```
 
 ## 「会話の記録・保存」との使い分け
