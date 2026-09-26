@@ -89,7 +89,7 @@ Claude Codeで作業中に、クリッピングと関連するトピックが出
 
 → Claudeが `sources/clippings/` に OAuth 2.0 のクリッピングがあることを検知
 → `wiki/concepts/oauth2.md` を自動作成
-→「wikiを更新しました: [[oauth2]]」と報告
+→「wikiを更新しました: `[[oauth2]]`」と報告
 
 ### パターンB：まとめて整理を依頼する
 
@@ -159,7 +159,7 @@ A: まだIngestされていないだけ。`sources/clippings/` に保存され�
 A: `sources/clippings/` に `ファイル名 1.md` という重複ファイルができる。Obsidianで開いて不要な方を削除すればOK。
 
 **Q: 間違った内容がwikiページになった**
-A: wikiページはClaudeが書くが、訂正はいつでもできる。「[[ページ名]]の〇〇を修正して」と指示すれば更新される。
+A: wikiページはClaudeが書くが、訂正はいつでもできる。「`[[ページ名]]` の〇〇を修正して」と指示すれば更新される。
 
 **Q: Obsidianがインストールされていないデバイスでも見られるか**
 A: iCloud Drive内のファイルなので、iCloudドライブのWebサイト（icloud.com）からもMarkdownファイルとして閲覧可能。ただし整形されない。

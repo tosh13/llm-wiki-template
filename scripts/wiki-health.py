@@ -135,6 +135,11 @@ def check(vault: str) -> tuple[list[str], list[str]]:
     d = os.path.join(vault, "index")
     if os.path.isdir(d):
         targets |= {os.path.splitext(f)[0] for f in os.listdir(d) if f.endswith(".md")}
+    # sources/ の md（外部資料へのポインタ等）も Obsidian はファイル名で解決する。
+    # 数えないと、原資料への正しいリンクを未作成ページとして報せ続ける。
+    src = os.path.join(vault, "sources")
+    for root, _, fs in os.walk(src):
+        targets |= {os.path.splitext(f)[0] for f in fs if f.endswith(".md")}
     dead: list[str] = []
     for p in pages:
         body = re.sub(r"```.*?```", "", p.body, flags=re.S)
