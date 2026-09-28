@@ -87,7 +87,18 @@ iCloud for Windows は、他の端末が vault のファイルを削除して作
 
 ### 発信側
 
-上の「発信側の条件」に合う端末を1台選ぶ。Windows では PowerShell で次を実行する。iCloud for Windows はサインインしている間しか同期しないので、ログオン中だけ動く設定にしている。
+上の「発信側の条件」に合う端末を1台選ぶ。
+
+Mac では次を実行する。launchd に `llm-wiki.rehydrate-serve` として登録し、ログイン中は30分ごとに `serve` を回す。`status` で動いているか、`uninstall` でやめる。
+
+```bash
+bash ~/.claude/llm-wiki-template/scripts/llm-wiki-serve-launchd.sh install
+bash ~/.claude/llm-wiki-template/scripts/llm-wiki-serve-launchd.sh status
+```
+
+`status` の `last exit code = 0` と、`~/.claude/state/llm-wiki-rehydrate/serve.log` の最後の行を見る。依頼が無い回は何も書かない。launchd から起動したジョブが iCloud の vault を読めることは、2026-09-28 に依頼1件の `--dry-run` で確かめた。
+
+Windows では PowerShell で次を実行する。iCloud for Windows はサインインしている間しか同期しないので、ログオン中だけ動く設定にしている。
 
 ```powershell
 $exe = (& py -c "import sys; print(sys.executable)").Trim()
@@ -102,4 +113,3 @@ Register-ScheduledTask -TaskName "llm-wiki-rehydrate-serve" -Action $action -Tri
 
 `Get-ScheduledTaskInfo -TaskName llm-wiki-rehydrate-serve` の `LastTaskResult` が `0` なら動いている。やめるときは `Unregister-ScheduledTask -TaskName llm-wiki-rehydrate-serve`。
 
-Mac を発信側にする手順（launchd）はまだ書いていない。

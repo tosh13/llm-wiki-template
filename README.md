@@ -125,6 +125,7 @@ llm-wiki-template/
     ├── llm-wiki-rehydrate.py          # 殻のまま読めないページを依頼に応じて作り直す
     ├── llm-wiki-stuck-report.sh       # 受信側のセッション開始で上の report を裏で起動
     ├── llm-wiki-name-check.sh         # iCloud for Windows がずらした名前を戻す
+    ├── llm-wiki-serve-launchd.sh      # Mac を発信側にする（launchd への登録）
     └── lib/common.sh
 ```
 
