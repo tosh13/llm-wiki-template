@@ -100,6 +100,7 @@ llm-wiki-template/
 ├── LICENSE                            # MIT License
 ├── prerequisites.md                   # 前提準備チェックリスト（macOS）
 ├── prerequisites-windows.md           # 前提準備とセットアップ（Windows）
+├── icloud-stuck-pages.md              # iCloud の詰まり（殻・名前のずれ）の回復
 ├── story/
 │   └── design-rationale.md            # 経緯と設計判断の理由
 ├── schema/
@@ -121,6 +122,9 @@ llm-wiki-template/
     ├── wiki-index.py                  # 索引を frontmatter から生成
     ├── wiki-health.py                 # vault の健全性点検
     ├── wikilib.py                     # 上2つが使う共通ライブラリ
+    ├── llm-wiki-rehydrate.py          # 殻のまま読めないページを依頼に応じて作り直す
+    ├── llm-wiki-stuck-report.sh       # 受信側のセッション開始で上の report を裏で起動
+    ├── llm-wiki-name-check.sh         # iCloud for Windows がずらした名前を戻す
     └── lib/common.sh
 ```
 
@@ -144,6 +148,10 @@ python3 scripts/wiki-health.py         # 点検。異常が無ければ何も出
 
 点検は SessionStart などで毎回走らせる想定（実測 0.1 秒）。vault が無い端末では黙って
 終わる。
+
+iCloud の実体が落ちてこない端末（TLS を傍受する網につながった端末など）と、iCloud for
+Windows が名前をずらす端末のために、`llm-wiki-rehydrate.py`・`llm-wiki-stuck-report.sh`・
+`llm-wiki-name-check.sh` の3本がある。症状・機序・登録の手順は `icloud-stuck-pages.md`。
 
 ## MIGRATION
 
